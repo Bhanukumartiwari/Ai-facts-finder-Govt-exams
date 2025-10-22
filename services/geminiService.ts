@@ -1,6 +1,49 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { FactResult, Language, ExamInfoResult } from '../types';
 
+/**
+ * Extracts a JSON string from text that might be wrapped in markdown code fences.
+ * @param text The string to process.
+ * @returns The extracted JSON string, or the original text if no fences are found.
+ */
+function extractJsonFromMarkdown(text: string): string {
+    const match = text.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+    if (match && match[1]) {
+        return match[1].trim();
+    }
+    return text.trim();
+}
+
+/**
+ * Handles errors from the Gemini API and returns a user-friendly message.
+ * @param error The error object.
+ * @param context A string describing the operation that failed.
+ * @returns An instance of Error with a user-friendly message.
+ */
+function handleAiError(error: any, context: string): Error {
+    console.error(`Error ${context}:`, error);
+
+    if (error instanceof Error) {
+        const lowerCaseMessage = error.message.toLowerCase();
+        if (lowerCaseMessage.includes('api key not valid') || lowerCaseMessage.includes('api_key')) {
+            return new Error("API Key is invalid or missing. Please check your configuration.");
+        }
+        if (lowerCaseMessage.includes('400')) {
+            return new Error(`The request for ${context} was invalid. Please check your input.`);
+        }
+        if (lowerCaseMessage.includes('500') || lowerCaseMessage.includes('503')) {
+            return new Error(`The AI service is temporarily unavailable. Please try again later.`);
+        }
+        if (error instanceof SyntaxError) {
+             return new Error(`The AI returned an invalid response for ${context}. Please try again.`);
+        }
+    }
+    
+    // Generic fallback
+    return new Error(`Failed to complete ${context}. Please check your connection and try again.`);
+}
+
+
 const factGenerationSchema = {
   type: Type.OBJECT,
   properties: {
@@ -49,7 +92,7 @@ export const generateFactsForTopic = async (topic: string, language: Language): 
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
-    const prompt = `In ${langInstruction}, for the topic "${topic}", provide two things: 1. A list of at least 5 interesting facts. 2. A list of 3-5 related topics.`;
+    const prompt = `In ${langInstruction}, for the topic "${topic}", provide a JSON object with two keys: "facts" (an array of at least 5 interesting facts) and "related_topics" (an array of 3-5 related topics).`;
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
@@ -59,17 +102,11 @@ export const generateFactsForTopic = async (topic: string, language: Language): 
       },
     });
 
-    const jsonText = response.text.trim();
-    // It is possible Gemini returns markdown ```json ... ``` wrapper
-    const sanitizedJson = jsonText.startsWith('```json') 
-      ? jsonText.substring(7, jsonText.length - 3).trim()
-      : jsonText;
-      
+    const sanitizedJson = extractJsonFromMarkdown(response.text);
     const result = JSON.parse(sanitizedJson);
     return result as FactResult;
   } catch (error) {
-    console.error("Error generating facts:", error);
-    throw new Error("Failed to generate facts from AI. Please try again.");
+    throw handleAiError(error, "generating facts");
   }
 };
 
@@ -87,8 +124,7 @@ export const summarizeText = async (text: string, language: Language): Promise<s
     });
     return response.text;
   } catch (error) {
-    console.error("Error summarizing text:", error);
-    throw new Error("Failed to summarize text. The file might be too large or in an unsupported format.");
+    throw handleAiError(error, "summarizing text");
   }
 };
 
@@ -121,8 +157,7 @@ export const generateCurrentAffairs = async (language: Language): Promise<string
     const facts = text.split('\n').map(fact => fact.replace(/^[*-]\s*/, '')).filter(fact => fact.trim() !== '');
     return facts;
   } catch (error) {
-    console.error("Error generating current affairs:", error);
-    throw new Error("Failed to generate current affairs from AI. Please try again.");
+    throw handleAiError(error, "generating current affairs");
   }
 };
 
@@ -130,7 +165,7 @@ export const generateExamInfo = async (examName: string, language: Language): Pr
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const langInstruction = language === 'hi' ? 'Hindi' : 'English';
-        const prompt = `Provide a detailed breakdown for the exam named "${examName}" in ${langInstruction}. Give me the description, application start and end dates (mention if they are tentative or past), the full exam pattern, and a detailed syllabus.`;
+        const prompt = `Provide a detailed breakdown for the exam named "${examName}" in ${langInstruction}. Respond with a JSON object containing: "description", "apply_start_date", "apply_end_date", "exam_pattern", and "syllabus". For dates, mention if they are tentative or past.`;
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -140,14 +175,9 @@ export const generateExamInfo = async (examName: string, language: Language): Pr
             },
         });
 
-        const jsonText = response.text.trim();
-        const sanitizedJson = jsonText.startsWith('```json')
-            ? jsonText.substring(7, jsonText.length - 3).trim()
-            : jsonText;
-
+        const sanitizedJson = extractJsonFromMarkdown(response.text);
         return JSON.parse(sanitizedJson) as ExamInfoResult;
     } catch (error) {
-        console.error("Error generating exam info:", error);
-        throw new Error("Failed to generate exam information from AI. Please check the exam name and try again.");
+        throw handleAiError(error, "generating exam information");
     }
 };
