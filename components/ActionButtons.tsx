@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-import { translations } from '../translations';
-import { Language } from '../types';
+import { translations } from '../translations.ts';
+import { Language } from '../types.ts';
 
 const ShareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -40,7 +41,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ language, contentT
 
   const handleDownload = () => {
     if (!contentToShare) return;
-    const blob = new Blob([contentToShare], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([contentToShare], { type: 'text/plain;charset=utf-t' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

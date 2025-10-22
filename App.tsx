@@ -1,14 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
-import { getFactOfTheDay } from './services/geminiService';
-import { FactGenerator } from './components/FactGenerator';
-import { FileSummarizer } from './components/FileSummarizer';
-import { CurrentAffairs } from './components/CurrentAffairs';
-import { ExamInfo } from './components/ExamInfo';
-import { TabButton } from './components/TabButton';
-import { Header } from './components/Header';
-import { LoadingSpinner } from './components/LoadingSpinner';
-import { translations } from './translations';
-import { Language } from './types';
+import { getFactOfTheDay } from './services/geminiService.ts';
+import { FactGenerator } from './components/FactGenerator.tsx';
+import { FileSummarizer } from './components/FileSummarizer.tsx';
+import { CurrentAffairs } from './components/CurrentAffairs.tsx';
+import { ExamInfo } from './components/ExamInfo.tsx';
+import { TabButton } from './components/TabButton.tsx';
+import { Header } from './components/Header.tsx';
+import { LoadingSpinner } from './components/LoadingSpinner.tsx';
+import { translations } from './translations.ts';
+import { Language } from './types.ts';
 
 type Tab = 'facts' | 'summarizer' | 'currentAffairs' | 'examInfo';
 

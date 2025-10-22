@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
-import { generateExamInfo } from '../services/geminiService';
-import { ExamInfoResult, Language } from '../types';
-import { LoadingSpinner } from './LoadingSpinner';
-import { translations } from '../translations';
-import { ActionButtons } from './ActionButtons';
+import { generateExamInfo } from '../services/geminiService.ts';
+import { ExamInfoResult, Language } from '../types.ts';
+import { LoadingSpinner } from './LoadingSpinner.tsx';
+import { translations } from '../translations.ts';
+import { ActionButtons } from './ActionButtons.tsx';
 
 interface ExamInfoProps {
   language: Language;

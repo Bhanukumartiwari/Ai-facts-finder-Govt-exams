@@ -1,6 +1,7 @@
 
+
 import { GoogleGenAI, Type } from "@google/genai";
-import { FactResult, Language, ExamInfoResult } from '../types';
+import { FactResult, Language, ExamInfoResult } from '../types.ts';
 
 /**
  * Checks if the API key is available in the environment variables.

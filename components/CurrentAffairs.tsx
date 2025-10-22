@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
-import { generateCurrentAffairs } from '../services/geminiService';
-import { Language } from '../types';
-import { LoadingSpinner } from './LoadingSpinner';
-import { ActionButtons } from './ActionButtons';
-import { translations } from '../translations';
+import { generateCurrentAffairs } from '../services/geminiService.ts';
+import { Language } from '../types.ts';
+import { LoadingSpinner } from './LoadingSpinner.tsx';
+import { ActionButtons } from './ActionButtons.tsx';
+import { translations } from '../translations.ts';
 
 interface CurrentAffairsProps {
   language: Language;
