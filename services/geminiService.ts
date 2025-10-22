@@ -2,6 +2,17 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { FactResult, Language, ExamInfoResult } from '../types';
 
 /**
+ * Checks if the API key is available in the environment variables.
+ * Throws a clear, user-friendly error if the key is missing, preventing
+ * vague network errors from appearing in the UI.
+ */
+const ensureApiKey = () => {
+    if (!process.env.API_KEY) {
+        throw new Error("Configuration Error: API Key not found. The application is not properly configured to communicate with the AI service. Please ensure the API_KEY environment variable is set in your deployment settings.");
+    }
+};
+
+/**
  * Extracts a JSON string from text that might be wrapped in markdown code fences.
  * @param text The string to process.
  * @returns The extracted JSON string, or the original text if no fences are found.
@@ -103,6 +114,7 @@ const examInfoSchema = {
 };
 
 export const generateFactsForTopic = async (topic: string, language: Language): Promise<FactResult> => {
+  ensureApiKey();
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
@@ -125,6 +137,7 @@ export const generateFactsForTopic = async (topic: string, language: Language): 
 };
 
 export const summarizeText = async (text: string, language: Language): Promise<string> => {
+  ensureApiKey();
   if (!text.trim()) {
     throw new Error("Cannot summarize empty text.");
   }
@@ -143,6 +156,7 @@ export const summarizeText = async (text: string, language: Language): Promise<s
 };
 
 export const getFactOfTheDay = async (language: Language): Promise<string> => {
+  ensureApiKey();
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
@@ -158,6 +172,7 @@ export const getFactOfTheDay = async (language: Language): Promise<string> => {
 };
 
 export const generateCurrentAffairs = async (language: Language): Promise<string[]> => {
+  ensureApiKey();
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
@@ -175,6 +190,7 @@ export const generateCurrentAffairs = async (language: Language): Promise<string
 };
 
 export const generateExamInfo = async (examName: string, language: Language): Promise<ExamInfoResult> => {
+    ensureApiKey();
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const langInstruction = language === 'hi' ? 'Hindi' : 'English';
