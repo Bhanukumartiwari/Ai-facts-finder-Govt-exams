@@ -1,12 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { FactResult, Language, ExamInfoResult } from '../types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const factGenerationSchema = {
   type: Type.OBJECT,
   properties: {
@@ -53,6 +47,7 @@ const examInfoSchema = {
 
 export const generateFactsForTopic = async (topic: string, language: Language): Promise<FactResult> => {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `In ${langInstruction}, for the topic "${topic}", provide two things: 1. A list of at least 5 interesting facts. 2. A list of 3-5 related topics.`;
     const response = await ai.models.generateContent({
@@ -83,6 +78,7 @@ export const summarizeText = async (text: string, language: Language): Promise<s
     throw new Error("Cannot summarize empty text.");
   }
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `Summarize the following text in a clear, concise, and easy-to-understand way in ${langInstruction}. Focus on the key points and main ideas. Text: """${text}"""`;
     const response = await ai.models.generateContent({
@@ -98,6 +94,7 @@ export const summarizeText = async (text: string, language: Language): Promise<s
 
 export const getFactOfTheDay = async (language: Language): Promise<string> => {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `Provide one interesting and surprising science or technology fact of the day, in ${langInstruction}. The fact should be concise, easy to understand, and engaging.`;
     const response = await ai.models.generateContent({
@@ -113,6 +110,7 @@ export const getFactOfTheDay = async (language: Language): Promise<string> => {
 
 export const generateCurrentAffairs = async (language: Language): Promise<string[]> => {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `Generate a list of 5 to 7 of the most important and recent current affairs and general knowledge points for today. Present them as a list of bullet points. The topics should be relevant for competitive exams in India and general global awareness. The response must be in ${langInstruction}.`;
     const response = await ai.models.generateContent({
@@ -130,6 +128,7 @@ export const generateCurrentAffairs = async (language: Language): Promise<string
 
 export const generateExamInfo = async (examName: string, language: Language): Promise<ExamInfoResult> => {
     try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const langInstruction = language === 'hi' ? 'Hindi' : 'English';
         const prompt = `Provide a detailed breakdown for the exam named "${examName}" in ${langInstruction}. Give me the description, application start and end dates (mention if they are tentative or past), the full exam pattern, and a detailed syllabus.`;
         const response = await ai.models.generateContent({
