@@ -8,8 +8,7 @@ import { FactResult, Language, ExamInfoResult } from '../types.ts';
  * Throws a clear, user-friendly error if the key is missing.
  */
 const ensureApiKey = () => {
-    // FIX: Use process.env.API_KEY as per the guidelines.
-    if (!process.env.API_KEY) {
+    if (typeof process === 'undefined' || !process.env || !process.env.API_KEY) {
         throw new Error("Configuration Error: API Key not found. Please ensure the API_KEY environment variable is set.");
     }
 };
@@ -40,8 +39,7 @@ function handleAiError(error: any, context: string): Error {
         const lowerCaseMessage = error.message.toLowerCase();
         
         // Specific API key issues
-        // FIX: Remove reference to VITE_API_KEY and update error message.
-        if (lowerCaseMessage.includes('api key not valid') || lowerCaseMessage.includes('api_key')) {
+        if (lowerCaseMessage.includes('api key not valid') || lowerCaseMessage.includes('api_key') || lowerCaseMessage.includes('api key not found')) {
             return new Error("API Key is invalid or missing. Please check your API_KEY configuration.");
         }
         
@@ -119,7 +117,6 @@ const examInfoSchema = {
 export const generateFactsForTopic = async (topic: string, language: Language): Promise<FactResult> => {
   ensureApiKey();
   try {
-    // FIX: Use process.env.API_KEY as per the guidelines.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `In ${langInstruction}, for the topic "${topic}", provide a JSON object with two keys: "facts" (an array of at least 5 interesting facts) and "related_topics" (an array of 3-5 related topics).`;
@@ -146,7 +143,6 @@ export const summarizeText = async (text: string, language: Language): Promise<s
     throw new Error("Cannot summarize empty text.");
   }
   try {
-    // FIX: Use process.env.API_KEY as per the guidelines.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `Summarize the following text in a clear, concise, and easy-to-understand way in ${langInstruction}. Focus on the key points and main ideas. Text: """${text}"""`;
@@ -163,7 +159,6 @@ export const summarizeText = async (text: string, language: Language): Promise<s
 export const getFactOfTheDay = async (language: Language): Promise<string> => {
   ensureApiKey();
   try {
-    // FIX: Use process.env.API_KEY as per the guidelines.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `Provide one interesting and surprising science or technology fact of the day, in ${langInstruction}. The fact should be concise, easy to understand, and engaging.`;
@@ -180,7 +175,6 @@ export const getFactOfTheDay = async (language: Language): Promise<string> => {
 export const generateCurrentAffairs = async (language: Language): Promise<string[]> => {
   ensureApiKey();
   try {
-    // FIX: Use process.env.API_KEY as per the guidelines.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const langInstruction = language === 'hi' ? 'Hindi' : 'English';
     const prompt = `Generate a list of 5 to 7 of the most important and recent current affairs and general knowledge points for today. Present them as a list of bullet points. The topics should be relevant for competitive exams in India and general global awareness. The response must be in ${langInstruction}.`;
@@ -199,7 +193,6 @@ export const generateCurrentAffairs = async (language: Language): Promise<string
 export const generateExamInfo = async (examName: string, language: Language): Promise<ExamInfoResult> => {
     ensureApiKey();
     try {
-        // FIX: Use process.env.API_KEY as per the guidelines.
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const langInstruction = language === 'hi' ? 'Hindi' : 'English';
         const prompt = `Provide a detailed breakdown for the exam named "${examName}" in ${langInstruction}. Respond with a JSON object containing: "description", "apply_start_date", "apply_end_date", "exam_pattern", and "syllabus". For dates, mention if they are tentative or past.`;
