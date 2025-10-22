@@ -25,21 +25,35 @@ function handleAiError(error: any, context: string): Error {
 
     if (error instanceof Error) {
         const lowerCaseMessage = error.message.toLowerCase();
+        
+        // Specific API key issues
         if (lowerCaseMessage.includes('api key not valid') || lowerCaseMessage.includes('api_key')) {
             return new Error("API Key is invalid or missing. Please check your configuration.");
         }
+        
+        // Content blocking issues from Gemini
+        if (lowerCaseMessage.includes('blocked') && lowerCaseMessage.includes('safety')) {
+            return new Error(`Your request for ${context} was blocked due to safety settings. Please try a different topic or wording.`);
+        }
+        if (lowerCaseMessage.includes('recitation')) {
+             return new Error(`Your request for ${context} was blocked to prevent recitation of copyrighted material. Please try a different topic.`);
+        }
+
+        // Network/Server issues
         if (lowerCaseMessage.includes('400')) {
             return new Error(`The request for ${context} was invalid. Please check your input.`);
         }
         if (lowerCaseMessage.includes('500') || lowerCaseMessage.includes('503')) {
             return new Error(`The AI service is temporarily unavailable. Please try again later.`);
         }
+        
+        // Response parsing issues
         if (error instanceof SyntaxError) {
-             return new Error(`The AI returned an invalid response for ${context}. Please try again.`);
+             return new Error(`The AI returned an invalid response format for ${context}. Please try again.`);
         }
     }
     
-    // Generic fallback
+    // Generic fallback for other errors (e.g., network issues)
     return new Error(`Failed to complete ${context}. Please check your connection and try again.`);
 }
 
@@ -139,8 +153,7 @@ export const getFactOfTheDay = async (language: Language): Promise<string> => {
     });
     return response.text;
   } catch (error) {
-    console.error("Error getting fact of the day:", error);
-    return "Could not fetch the fact of the day. Please check your connection and try again.";
+    throw handleAiError(error, "getting fact of the day");
   }
 };
 

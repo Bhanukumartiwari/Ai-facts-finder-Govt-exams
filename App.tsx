@@ -23,9 +23,15 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchFact = async () => {
       setIsLoadingFact(true);
-      const fact = await getFactOfTheDay(language);
-      setFactOfTheDay(fact);
-      setIsLoadingFact(false);
+      try {
+        const fact = await getFactOfTheDay(language);
+        setFactOfTheDay(fact);
+      } catch (error: any) {
+        // Display the user-friendly error message from the service
+        setFactOfTheDay(error.message || 'Could not fetch the fact of the day.');
+      } finally {
+        setIsLoadingFact(false);
+      }
     };
     fetchFact();
   }, [language]);
