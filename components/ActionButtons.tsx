@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { translations } from '../translations.ts';
 import { Language } from '../types.ts';
@@ -41,7 +40,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ language, contentT
 
   const handleDownload = () => {
     if (!contentToShare) return;
-    const blob = new Blob([contentToShare], { type: 'text/plain;charset=utf-t' });
+    const blob = new Blob([contentToShare], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
